@@ -3,7 +3,6 @@
  - **20min**
  - **220.ro**
  - **23video**
- - **247sports**
  - **24video**
  - **3qsdn**: 3Q SDN
  - **3sat**
@@ -172,8 +171,7 @@
  - **cbsnews**: CBS News
  - **cbsnews:embed**
  - **cbsnews:livevideo**: CBS News Live Videos
- - **cbssports**
- - **cbssports:embed**
+ - **CBSSports**
  - **CCMA**
  - **CCTV**: 央视网
  - **CDA**
@@ -251,8 +249,6 @@
  - **DiscoveryGoPlaylist**
  - **DiscoveryNetworksDe**
  - **DiscoveryPlus**
- - **DiscoveryPlusIndia**
- - **DiscoveryPlusIndiaShow**
  - **DiscoveryVR**
  - **Disney**
  - **dlive:stream**
@@ -461,8 +457,6 @@
  - **kuwo:singer**: 酷我音乐 - 歌手
  - **kuwo:song**: 酷我音乐
  - **la7.it**
- - **la7.it:pod:episode**
- - **la7.it:podcast**
  - **laola1tv**
  - **laola1tv:embed**
  - **lbry**
@@ -486,8 +480,6 @@
  - **limelight**
  - **limelight:channel**
  - **limelight:channel_list**
- - **LineLive**
- - **LineLiveChannel**
  - **LineTV**
  - **linkedin:learning**
  - **linkedin:learning:course**
@@ -514,7 +506,6 @@
  - **mangomolo:live**
  - **mangomolo:video**
  - **ManyVids**
- - **MaoriTV**
  - **Markiza**
  - **MarkizaPage**
  - **massengeschmack.tv**
@@ -615,7 +606,6 @@
  - **ndr:embed**
  - **ndr:embed:base**
  - **NDTV**
- - **Nebula**
  - **NerdCubedFeed**
  - **netease:album**: 网易云音乐 - 专辑
  - **netease:djradio**: 网易云音乐 - 电台
@@ -634,7 +624,6 @@
  - **NextTV**: 壹電視
  - **Nexx**
  - **NexxEmbed**
- - **NFHSNetwork**
  - **nfl.com** (Currently broken)
  - **nfl.com:article** (Currently broken)
  - **NhkVod**
@@ -718,9 +707,6 @@
  - **OutsideTV**
  - **PacktPub**
  - **PacktPubCourse**
- - **PalcoMP3:artist**
- - **PalcoMP3:song**
- - **PalcoMP3:video**
  - **pandora.tv**: 판도라TV
  - **ParamountNetwork**
  - **parliamentlive.tv**: UK parliament videos
@@ -1107,7 +1093,6 @@
  - **Vidbit**
  - **Viddler**
  - **Videa**
- - **video.arnes.si**: Arnes Video
  - **video.google:search**: Google Video search
  - **video.sky.it**
  - **video.sky.it:live**
