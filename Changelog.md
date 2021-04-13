@@ -6,8 +6,10 @@
 * Run `make doc`
 * Update Changelog.md and CONTRIBUTORS
 * Change "Merged with ytdl" version in Readme.md if needed
+* Add new/fixed extractors in "new features" section of Readme.md
 * Commit to master as `Release <version>`
-* Push to origin/release - build task will now run
+* Push to origin/release using `git push origin master:release`
+    build task will now run
 * Update version.py using devscripts\update-version.py
 * Run `make issuetemplates`
 * Commit to master as `[version] update :ci skip all`
@@ -17,9 +19,49 @@
 -->
 
 
+### 2021.04.11
+* Add option `--convert-thumbnails` (only jpg currently supported)
+* Format selector `mergeall` to download and merge all formats
+* Pass any field to `--exec` using similar syntax to output template
+* Choose downloader for each protocol using `--downloader PROTO:NAME`
+    * Alias `--downloader` for `--external-downloader`
+    * Added `native` as an option for the downloader
+* Merge youtube-dl: Upto [commit/4fb25ff](https://github.com/ytdl-org/youtube-dl/commit/4fb25ff5a3be5206bb72e5c4046715b1529fb2c7) (except vimeo)
+* [DiscoveryPlusIndia] Add DiscoveryPlusIndiaShowIE by [Ashish0804](https://github.com/Ashish0804)
+* [NFHSNetwork] Add extractor by [llacb47](https://github.com/llacb47)
+* [nebula] Add extractor (watchnebula.com) by [hheimbuerger](https://github.com/hheimbuerger)
+* [nitter] Fix extraction of reply tweets and update instance list by [B0pol](https://github.com/B0pol)
+* [nitter] Fix thumbnails by [B0pol](https://github.com/B0pol)
+* [youtube] Fix thumbnail URL
+* [youtube] Parse API parameters from initial webpage by [colethedj](https://github.com/colethedj)
+* [youtube] Extract comments' approximate timestamp by [colethedj](https://github.com/colethedj)
+* [youtube] Fix alert extraction
+* [bilibili] Fix uploader
+* [utils] Add `datetime_from_str` and `datetime_add_months` by [colethedj](https://github.com/colethedj)
+* Run some `postprocessors` before actual download
+* Improve argument parsing for `-P`, `-o`, `-S`
+* Fix some `m3u8` not obeying `--allow-unplayable-formats`
+* Fix default of `dynamic_mpd`
+* Deprecate `--all-formats`, `--include-ads`, `--hls-prefer-native`, `--hls-prefer-ffmpeg`
+* [documentation] Improvements
+
+### 2021.04.03
+* Merge youtube-dl: Upto [commit/654b4f4](https://github.com/ytdl-org/youtube-dl/commit/654b4f4ff2718f38b3182c1188c5d569c14cc70a)
+* Ability to set a specific field in the file's metadata using `--parse-metadata`
+* Ability to select n'th best format like `-f bv*.2`
+* [DiscoveryPlus] Add discoveryplus.in
+* [la7] Add podcasts and podcast playlists by [nixxo](https://github.com/nixxo)
+* [mildom] Update extractor with current proxy by [nao20010128nao](https://github.com/nao20010128nao)
+* [ard:mediathek] Fix video id extraction
+* [generic] Detect Invidious' link element
+* [youtube] Show premium state in `availability` by [colethedj](https://github.com/colethedj)
+* [viewsource] Add extractor to handle `view-source:`
+* [sponskrub] Run before embedding thumbnail
+* [documentation] Improve `--parse-metadata` documentation
+
+
 ### 2021.03.24.1
 * Revert [commit/8562218](https://github.com/ytdl-org/youtube-dl/commit/8562218350a79d4709da8593bb0c538aa0824acf)
-
 
 ### 2021.03.24
 * Merge youtube-dl: Upto 2021.03.25 ([commit/8562218](https://github.com/ytdl-org/youtube-dl/commit/8562218350a79d4709da8593bb0c538aa0824acf))
@@ -101,7 +143,6 @@
 
 ### 2021.03.03.2
 * [build] Fix bug
-
 
 ### 2021.03.03
 * [youtube] Use new browse API for continuation page extraction by [colethedj](https://github.com/colethedj) and [pukkandan](https://github.com/pukkandan)

@@ -107,22 +107,31 @@ def parseOpts(overrideArguments=None):
 
         return ''.join(opts)
 
-    def _comma_separated_values_options_callback(option, opt_str, value, parser):
-        setattr(parser.values, option.dest, value.split(','))
+    def _comma_separated_values_options_callback(option, opt_str, value, parser, prepend=True):
+        setattr(
+            parser.values, option.dest,
+            value.split(',') if not prepend
+            else value.split(',') + getattr(parser.values, option.dest))
 
     def _dict_from_multiple_values_options_callback(
-            option, opt_str, value, parser, allowed_keys=r'[\w-]+', delimiter=':', default_key=None, process=None):
+            option, opt_str, value, parser,
+            allowed_keys=r'[\w-]+', delimiter=':', default_key=None, process=None, multiple_keys=True):
 
         out_dict = getattr(parser.values, option.dest)
-        mobj = re.match(r'(?i)(?P<key>%s)%s(?P<val>.*)$' % (allowed_keys, delimiter), value)
+        if multiple_keys:
+            allowed_keys = r'(%s)(,(%s))*' % (allowed_keys, allowed_keys)
+        mobj = re.match(r'(?i)(?P<keys>%s)%s(?P<val>.*)$' % (allowed_keys, delimiter), value)
         if mobj is not None:
-            key, val = mobj.group('key').lower(), mobj.group('val')
+            keys = [k.strip() for k in mobj.group('keys').lower().split(',')]
+            val = mobj.group('val')
         elif default_key is not None:
-            key, val = default_key, value
+            keys, val = [default_key], value
         else:
             raise optparse.OptionValueError(
                 'wrong %s formatting; it should be %s, not "%s"' % (opt_str, option.metavar, value))
-        out_dict[key] = process(val) if callable(process) else val
+        val = process(val) if callable(process) else val
+        for key in keys:
+            out_dict[key] = val
 
     # No need to wrap help messages if we're on a wide console
     columns = compat_get_terminal_size().columns
@@ -250,7 +259,7 @@ def parseOpts(overrideArguments=None):
         help='Make all connections via IPv6',
     )
 
-    geo = optparse.OptionGroup(parser, 'Geo Restriction')
+    geo = optparse.OptionGroup(parser, 'Geo-restriction')
     geo.add_option(
         '--geo-verification-proxy',
         dest='geo_verification_proxy', default=None, metavar='URL',
@@ -393,11 +402,11 @@ def parseOpts(overrideArguments=None):
     selection.add_option(
         '--include-ads',
         dest='include_ads', action='store_true',
-        help='Download advertisements as well (experimental)')
+        help=optparse.SUPPRESS_HELP)
     selection.add_option(
         '--no-include-ads',
         dest='include_ads', action='store_false',
-        help='Do not download advertisements (default)')
+        help=optparse.SUPPRESS_HELP)
 
     authentication = optparse.OptionGroup(parser, 'Authentication Options')
     authentication.add_option(
@@ -420,21 +429,19 @@ def parseOpts(overrideArguments=None):
         '--video-password',
         dest='videopassword', metavar='PASSWORD',
         help='Video password (vimeo, youku)')
-
-    adobe_pass = optparse.OptionGroup(parser, 'Adobe Pass Options')
-    adobe_pass.add_option(
+    authentication.add_option(
         '--ap-mso',
         dest='ap_mso', metavar='MSO',
         help='Adobe Pass multiple-system operator (TV provider) identifier, use --ap-list-mso for a list of available MSOs')
-    adobe_pass.add_option(
+    authentication.add_option(
         '--ap-username',
         dest='ap_username', metavar='USERNAME',
         help='Multiple-system operator account login')
-    adobe_pass.add_option(
+    authentication.add_option(
         '--ap-password',
         dest='ap_password', metavar='PASSWORD',
         help='Multiple-system operator account password. If this option is left out, yt-dlp will ask interactively')
-    adobe_pass.add_option(
+    authentication.add_option(
         '--ap-list-mso',
         action='store_true', dest='ap_list_mso', default=False,
         help='List all supported multiple-system operators')
@@ -480,7 +487,7 @@ def parseOpts(overrideArguments=None):
     video_format.add_option(
         '--all-formats',
         action='store_const', dest='format', const='all',
-        help='Download all available video formats')
+        help=optparse.SUPPRESS_HELP)
     video_format.add_option(
         '--prefer-free-formats',
         action='store_true', dest='prefer_free_formats', default=False,
@@ -560,7 +567,7 @@ def parseOpts(overrideArguments=None):
     downloader.add_option(
         '-N', '--concurrent-fragments',
         dest='concurrent_fragment_downloads', metavar='N', default=1, type=int,
-        help='Number of fragments to download concurrently (default is %default)')
+        help='Number of fragments of a dash/hlsnative video that should be download concurrently (default is %default)')
     downloader.add_option(
         '-r', '--limit-rate', '--rate-limit',
         dest='ratelimit', metavar='RATE',
@@ -630,11 +637,11 @@ def parseOpts(overrideArguments=None):
     downloader.add_option(
         '--hls-prefer-native',
         dest='hls_prefer_native', action='store_true', default=None,
-        help='Use the native HLS downloader instead of ffmpeg')
+        help=optparse.SUPPRESS_HELP)
     downloader.add_option(
         '--hls-prefer-ffmpeg',
         dest='hls_prefer_native', action='store_false', default=None,
-        help='Use ffmpeg instead of the native HLS downloader')
+        help=optparse.SUPPRESS_HELP)
     downloader.add_option(
         '--hls-use-mpegts',
         dest='hls_use_mpegts', action='store_true', default=None,
@@ -650,11 +657,20 @@ def parseOpts(overrideArguments=None):
             'Do not use the mpegts container for HLS videos. '
             'This is default when not downloading live streams'))
     downloader.add_option(
-        '--external-downloader',
-        dest='external_downloader', metavar='NAME',
+        '--downloader', '--external-downloader',
+        dest='external_downloader', metavar='[PROTO:]NAME', default={}, type='str',
+        action='callback', callback=_dict_from_multiple_values_options_callback,
+        callback_kwargs={
+            'allowed_keys': 'http|ftp|m3u8|dash|rtsp|rtmp|mms',
+            'default_key': 'default', 'process': lambda x: x.strip()},
         help=(
-            'Name or path of the external downloader to use. '
-            'Currently supports %s (Recommended: aria2c)' % ', '.join(list_external_downloaders())))
+            'Name or path of the external downloader to use (optionally) prefixed by '
+            'the protocols (http, ftp, m3u8, dash, rstp, rtmp, mms) to use it for. '
+            'Currently supports native, %s (Recommended: aria2c). '
+            'You can use this option multiple times to set different downloaders for different protocols. '
+            'For example, --downloader aria2c --downloader "dash,m3u8:native" will use '
+            'aria2c for http/ftp downloads, and the native downloader for dash/m3u8 downloads '
+            '(Alias: --external-downloader)' % ', '.join(list_external_downloaders())))
     downloader.add_option(
         '--downloader-args', '--external-downloader-args',
         metavar='NAME:ARGS', dest='external_downloader_args', default={}, type='str',
@@ -693,6 +709,7 @@ def parseOpts(overrideArguments=None):
         '--add-header',
         metavar='FIELD:VALUE', dest='headers', default={}, type='str',
         action='callback', callback=_dict_from_multiple_values_options_callback,
+        callback_kwargs={'multiple_keys': False},
         help='Specify a custom HTTP header and its value, separated by a colon ":". You can use this option multiple times',
     )
     workarounds.add_option(
@@ -842,7 +859,7 @@ def parseOpts(overrideArguments=None):
         action='store_true', dest='useid', help=optparse.SUPPRESS_HELP)
     filesystem.add_option(
         '-P', '--paths',
-        metavar='TYPE:PATH', dest='paths', default={}, type='str',
+        metavar='TYPES:PATH', dest='paths', default={}, type='str',
         action='callback', callback=_dict_from_multiple_values_options_callback,
         callback_kwargs={
             'allowed_keys': 'home|temp|%s' % '|'.join(OUTTMPL_TYPES.keys()),
@@ -857,7 +874,7 @@ def parseOpts(overrideArguments=None):
             'This option is ignored if --output is an absolute path'))
     filesystem.add_option(
         '-o', '--output',
-        metavar='[TYPE:]TEMPLATE', dest='outtmpl', default={}, type='str',
+        metavar='[TYPES:]TEMPLATE', dest='outtmpl', default={}, type='str',
         action='callback', callback=_dict_from_multiple_values_options_callback,
         callback_kwargs={
             'allowed_keys': '|'.join(OUTTMPL_TYPES.keys()),
@@ -1018,7 +1035,7 @@ def parseOpts(overrideArguments=None):
         action='store_true', dest='rm_cachedir',
         help='Delete all filesystem cache files')
 
-    thumbnail = optparse.OptionGroup(parser, 'Thumbnail Images')
+    thumbnail = optparse.OptionGroup(parser, 'Thumbnail Options')
     thumbnail.add_option(
         '--write-thumbnail',
         action='store_true', dest='writethumbnail', default=False,
@@ -1084,14 +1101,17 @@ def parseOpts(overrideArguments=None):
         '--postprocessor-args', '--ppa',
         metavar='NAME:ARGS', dest='postprocessor_args', default={}, type='str',
         action='callback', callback=_dict_from_multiple_values_options_callback,
-        callback_kwargs={'default_key': 'default-compat', 'allowed_keys': r'\w+(?:\+\w+)?', 'process': compat_shlex_split},
+        callback_kwargs={
+            'allowed_keys': r'\w+(?:\+\w+)?', 'default_key': 'default-compat',
+            'process': compat_shlex_split, 'multiple_keys': False},
         help=(
             'Give these arguments to the postprocessors. '
             'Specify the postprocessor/executable name and the arguments separated by a colon ":" '
-            'to give the argument to the specified postprocessor/executable. Supported postprocessors are: '
-            'SponSkrub, ExtractAudio, VideoRemuxer, VideoConvertor, EmbedSubtitle, Metadata, Merger, '
-            'FixupStretched, FixupM4a, FixupM3u8, SubtitlesConvertor, EmbedThumbnail and SplitChapters. '
-            'The supported executables are: SponSkrub, FFmpeg, FFprobe, and AtomicParsley. '
+            'to give the argument to the specified postprocessor/executable. Supported PP are: '
+            'Merger, ExtractAudio, SplitChapters, Metadata, EmbedSubtitle, EmbedThumbnail, '
+            'SubtitlesConvertor, ThumbnailsConvertor, VideoRemuxer, VideoConvertor, '
+            'SponSkrub, FixupStretched, FixupM4a and FixupM3u8. '
+            'The supported executables are: AtomicParsley, FFmpeg, FFprobe, and SponSkrub. '
             'You can also specify "PP+EXE:ARGS" to give the arguments to the specified executable '
             'only when being used by the specified postprocessor. Additionally, for ffmpeg/ffprobe, '
             '"_i"/"_o" can be appended to the prefix optionally followed by a number to pass the argument '
@@ -1174,11 +1194,19 @@ def parseOpts(overrideArguments=None):
     postproc.add_option(
         '--exec',
         metavar='CMD', dest='exec_cmd',
-        help='Execute a command on the file after downloading and post-processing, similar to find\'s -exec syntax. Example: --exec \'adb push {} /sdcard/Music/ && rm {}\'')
+        help=(
+            'Execute a command on the file after downloading and post-processing. '
+            'Similar syntax to the output template can be used to pass any field as arguments to the command. '
+            'An additional field "filepath" that contains the final path of the downloaded file is also available. '
+            'If no fields are passed, "%(filepath)s" is appended to the end of the command'))
     postproc.add_option(
         '--convert-subs', '--convert-sub', '--convert-subtitles',
         metavar='FORMAT', dest='convertsubtitles', default=None,
         help='Convert the subtitles to another format (currently supported: srt|ass|vtt|lrc) (Alias: --convert-subtitles)')
+    postproc.add_option(
+        '--convert-thumbnails',
+        metavar='FORMAT', dest='convertthumbnails', default=None,
+        help='Convert the thumbnails to another format (currently supported: jpg)')
     postproc.add_option(
         '--split-chapters', '--split-tracks',
         dest='split_chapters', action='store_true', default=False,
@@ -1280,7 +1308,6 @@ def parseOpts(overrideArguments=None):
     parser.add_option_group(video_format)
     parser.add_option_group(subtitles)
     parser.add_option_group(authentication)
-    parser.add_option_group(adobe_pass)
     parser.add_option_group(postproc)
     parser.add_option_group(sponskrub)
     parser.add_option_group(extractor)

@@ -80,6 +80,7 @@ from .arte import (
     ArteTVEmbedIE,
     ArteTVPlaylistIE,
 )
+from .arnes import ArnesIE
 from .asiancrush import (
     AsianCrushIE,
     AsianCrushPlaylistIE,
@@ -209,7 +210,11 @@ from .cbsnews import (
     CBSNewsIE,
     CBSNewsLiveVideoIE,
 )
-from .cbssports import CBSSportsIE
+from .cbssports import (
+    CBSSportsEmbedIE,
+    CBSSportsIE,
+    TwentyFourSevenSportsIE,
+)
 from .ccc import (
     CCCIE,
     CCCPlaylistIE,
@@ -308,6 +313,10 @@ from .democracynow import DemocracynowIE
 from .dfb import DFBIE
 from .dhm import DHMIE
 from .digg import DiggIE
+from .discoveryplusindia import (
+    DiscoveryPlusIndiaIE,
+    DiscoveryPlusIndiaShowIE,
+)
 from .dotsub import DotsubIE
 from .douyutv import (
     DouyuShowIE,
@@ -316,7 +325,6 @@ from .douyutv import (
 from .dplay import (
     DPlayIE,
     DiscoveryPlusIE,
-    DiscoveryPlusIndiaIE,
     HGTVDeIE,
 )
 from .dreisat import DreiSatIE
@@ -629,7 +637,11 @@ from .limelight import (
     LimelightChannelIE,
     LimelightChannelListIE,
 )
-from .line import LineTVIE
+from .line import (
+    LineTVIE,
+    LineLiveIE,
+    LineLiveChannelIE,
+)
 from .linkedin import (
     LinkedInLearningIE,
     LinkedInLearningCourseIE,
@@ -667,6 +679,7 @@ from .mangomolo import (
     MangomoloLiveIE,
 )
 from .manyvids import ManyVidsIE
+from .maoritv import MaoriTVIE
 from .markiza import (
     MarkizaIE,
     MarkizaPageIE,
@@ -790,8 +803,9 @@ from .ndr import (
     NJoyEmbedIE,
 )
 from .ndtv import NDTVIE
-from .netzkino import NetzkinoIE
+from .nebula import NebulaIE
 from .nerdcubed import NerdCubedFeedIE
+from .netzkino import NetzkinoIE
 from .neteasemusic import (
     NetEaseMusicIE,
     NetEaseMusicAlbumIE,
@@ -816,6 +830,7 @@ from .nexx import (
     NexxIE,
     NexxEmbedIE,
 )
+from .nfhsnetwork import NFHSNetworkIE
 from .nfl import (
     NFLIE,
     NFLArticleIE,
@@ -926,6 +941,11 @@ from .outsidetv import OutsideTVIE
 from .packtpub import (
     PacktPubIE,
     PacktPubCourseIE,
+)
+from .palcomp3 import (
+    PalcoMP3IE,
+    PalcoMP3ArtistIE,
+    PalcoMP3VideoIE,
 )
 from .pandoratv import PandoraTVIE
 from .parliamentliveuk import ParliamentLiveUKIE
