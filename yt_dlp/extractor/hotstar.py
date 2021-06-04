@@ -246,7 +246,7 @@ class HotStarPlaylistIE(HotStarBaseIE):
 
 class HotStarSeriesIE(HotStarBaseIE):
     IE_NAME = 'hotstar:series'
-    _VALID_URL = r'(?:https?://)(?:www\.)?hotstar\.com(?:/in)?/tv/[^/]+/(?P<id>\d{10})$'
+    _VALID_URL = r'(?:https?://)(?:www\.)?hotstar\.com(?:/in)?/tv/[^/]+/(?P<id>\d+)$'
     _TESTS = [{
         'url': 'https://www.hotstar.com/in/tv/radhakrishn/1260000646',
         'info_dict': {
@@ -259,6 +259,12 @@ class HotStarSeriesIE(HotStarBaseIE):
             'id': '1260050431',
         },
         'playlist_mincount': 43,
+    }, {
+        'url': 'https://www.hotstar.com/in/tv/adventures-of-hatim/132',
+        'info_dict': {
+            'id': '132',
+        },
+        'playlist_mincount': 68,
     }]
 
     def _real_extract(self, url):
